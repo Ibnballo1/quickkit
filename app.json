@@ -37,6 +37,7 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      "./withAdMobVersion",
       "expo-router",
       "expo-sharing",
       "expo-system-ui",
@@ -45,7 +46,6 @@
         "expo-build-properties",
         {
           "android": {
-            "kotlinVersion": "2.3.0",
             "compileSdkVersion": 36,
             "targetSdkVersion": 36
           }
