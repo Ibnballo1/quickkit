@@ -37,7 +37,6 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "./withAdMobVersion",
       "expo-router",
       "expo-sharing",
       "expo-system-ui",
@@ -47,7 +46,8 @@
         {
           "android": {
             "compileSdkVersion": 36,
-            "targetSdkVersion": 36
+            "targetSdkVersion": 36,
+            "kotlinVersion": "2.3.0"
           }
         }
       ],
@@ -74,6 +74,7 @@
         "react-native-google-mobile-ads",
         {
           "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
           "iosAppId": "ca-app-pub-3940256099942544~1458002511",
           "delayAppMeasurementInit": true
         }

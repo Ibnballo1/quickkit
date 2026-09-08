@@ -1,7 +1,8 @@
 import React from "react";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/theme/ThemeProvider";
 import { ToolCard } from "@/components/ToolCard";
 
@@ -17,6 +18,7 @@ interface ToolDefinition {
 export default function HomeScreen(): React.JSX.Element {
   const { colors, typography, spacing } = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const tools: ToolDefinition[] = [
     {
@@ -101,22 +103,58 @@ export default function HomeScreen(): React.JSX.Element {
         paddingBottom: spacing.xxl,
       }}
     >
-      <Text
+      <View
         style={[
-          typography.displayLg,
-          { color: colors.textPrimary, marginBottom: spacing.xxs },
+          styles.headerRow,
+          { marginTop: insets.top > 0 ? 0 : spacing.sm },
         ]}
       >
-        QuickKit
-      </Text>
-      <Text
-        style={[
-          typography.bodyLg,
-          { color: colors.textSecondary, marginBottom: spacing.lg },
-        ]}
-      >
-        Everyday tools that just work.
-      </Text>
+        <View style={styles.headerText}>
+          <Text
+            style={[
+              typography.displayLg,
+              { color: colors.textPrimary, marginBottom: spacing.xxs },
+            ]}
+          >
+            QuickKit
+          </Text>
+          <Text
+            style={[
+              typography.bodyLg,
+              { color: colors.textSecondary, marginBottom: spacing.lg },
+            ]}
+          >
+            Everyday tools that just work.
+          </Text>
+        </View>
+        <View style={styles.headerActions}>
+          <Pressable
+            onPress={() => router.push("/history" as never)}
+            accessibilityRole="button"
+            accessibilityLabel="History"
+            hitSlop={10}
+            style={{ marginRight: spacing.md }}
+          >
+            <Ionicons
+              name="time-outline"
+              size={24}
+              color={colors.textPrimary}
+            />
+          </Pressable>
+          <Pressable
+            onPress={() => router.push("/settings" as never)}
+            accessibilityRole="button"
+            accessibilityLabel="Settings"
+            hitSlop={10}
+          >
+            <Ionicons
+              name="settings-outline"
+              size={24}
+              color={colors.textPrimary}
+            />
+          </Pressable>
+        </View>
+      </View>
       <View style={styles.grid}>
         {tools.map((tool) => (
           <View key={tool.key} style={styles.gridItem}>
@@ -137,6 +175,19 @@ export default function HomeScreen(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  headerText: {
+    flex: 1,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 4,
+  },
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",

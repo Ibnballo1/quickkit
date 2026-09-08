@@ -1,5 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
+// See imageCompression.ts for why /legacy is used here.
+import * as FileSystem from "expo-file-system/legacy";
 import { PickedImage } from "./types";
 
 export type PickImageOutcome =

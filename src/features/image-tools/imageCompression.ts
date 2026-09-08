@@ -1,5 +1,9 @@
 import * as ImageManipulator from "expo-image-manipulator";
-import * as FileSystem from "expo-file-system";
+// Imported from the /legacy subpath: SDK 54+ deprecated getInfoAsync on the
+// main 'expo-file-system' entrypoint in favor of File/Directory classes, and
+// in some cases the deprecation surfaces as a runtime error rather than just
+// a console warning. /legacy keeps the exact same imperative API working.
+import * as FileSystem from "expo-file-system/legacy";
 import { CompressionResult, CompressionTarget, PickedImage } from "./types";
 
 const MAX_QUALITY_SEARCH_ITERATIONS = 6;

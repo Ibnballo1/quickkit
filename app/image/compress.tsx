@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, Alert } from "react-native";
 import { ToolScreenLayout } from "@/components/ToolScreenLayout";
 import { PrimaryButton } from "@/components/PrimaryButton";
+import { InputField } from "@/components/InputField";
 import { ResultCard } from "@/components/ResultCard";
 import { ChipGroup } from "@/components/ChipGroup";
 import { useTheme } from "@/theme/ThemeProvider";
@@ -20,19 +21,26 @@ import { formatBytes } from "@/utils/formatBytes";
 import { addHistoryEntry } from "@/services/historyStorage";
 import { AdInterstitialService } from "@/services/AdInterstitialService";
 
-type TargetKey = "under500kb" | "under1mb" | "under2mb" | "bestQuality";
+type TargetKey =
+  | "under500kb"
+  | "under1mb"
+  | "under2mb"
+  | "bestQuality"
+  | "custom";
 
 const TARGET_OPTIONS: { value: TargetKey; label: string }[] = [
   { value: "under500kb", label: "Under 500 KB" },
   { value: "under1mb", label: "Under 1 MB" },
   { value: "under2mb", label: "Under 2 MB" },
   { value: "bestQuality", label: "Best quality" },
+  { value: "custom", label: "Custom" },
 ];
 
 export default function CompressImageScreen(): React.JSX.Element {
   const { colors, typography, spacing } = useTheme();
   const [image, setImage] = useState<PickedImage | null>(null);
   const [target, setTarget] = useState<TargetKey>("under1mb");
+  const [customKb, setCustomKb] = useState("");
   const [result, setResult] = useState<CompressionResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -54,9 +62,27 @@ export default function CompressImageScreen(): React.JSX.Element {
 
   const handleCompress = async (): Promise<void> => {
     if (!image) return;
+
+    let compressionTarget: CompressionTarget;
+    if (target === "custom") {
+      const kb = Number(customKb);
+      if (!Number.isFinite(kb) || kb <= 0) {
+        Alert.alert(
+          "Enter a target size",
+          "Enter the target size in KB, e.g. 127.",
+        );
+        return;
+      }
+      compressionTarget = {
+        kind: "custom",
+        maxSizeBytes: Math.round(kb * 1024),
+      };
+    } else {
+      compressionTarget = { kind: target };
+    }
+
     setIsProcessing(true);
     try {
-      const compressionTarget: CompressionTarget = { kind: target };
       const compressed = await compressImage(image, compressionTarget);
       setResult(compressed);
       await addHistoryEntry({
@@ -119,7 +145,6 @@ export default function CompressImageScreen(): React.JSX.Element {
             <Image
               source={{ uri: image.uri }}
               style={[styles.thumbnail, { borderRadius: 12 }]}
-              resizeMode="cover"
             />
             <View style={styles.previewMeta}>
               <Text
@@ -152,6 +177,16 @@ export default function CompressImageScreen(): React.JSX.Element {
             accessibilityLabel="Compression target"
           />
 
+          {target === "custom" ? (
+            <InputField
+              label="Target size"
+              keyboardType="number-pad"
+              value={customKb}
+              onChangeText={setCustomKb}
+              suffix="KB"
+            />
+          ) : null}
+
           <PrimaryButton
             label={isProcessing ? "Compressing…" : "Compress"}
             onPress={() => void handleCompress()}
@@ -167,7 +202,6 @@ export default function CompressImageScreen(): React.JSX.Element {
                   styles.resultPreview,
                   { borderRadius: 12, marginBottom: spacing.md },
                 ]}
-                resizeMode="contain"
               />
               <ResultCard
                 title="Result"

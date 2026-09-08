@@ -1,5 +1,6 @@
 import * as ImageManipulator from "expo-image-manipulator";
-import * as FileSystem from "expo-file-system";
+// See imageCompression.ts for why /legacy is used here.
+import * as FileSystem from "expo-file-system/legacy";
 import { PickedImage, ResizeMode, ResizeResult } from "./types";
 
 async function getSizeBytes(uri: string): Promise<number> {

@@ -1,5 +1,8 @@
 import * as Sharing from "expo-sharing";
-import * as MediaLibrary from "expo-media-library";
+// /legacy for the same reason as expo-file-system elsewhere in this
+// project: SDK 57 deprecated createAssetAsync/requestPermissionsAsync on
+// the main entrypoint in favor of a new class-based API.
+import * as MediaLibrary from "expo-media-library/legacy";
 
 export type SaveOutcome =
   | { status: "saved" }
