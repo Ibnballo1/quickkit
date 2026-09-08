@@ -6,7 +6,8 @@ export type HistoryKind =
   | "calculation"
   | "conversion"
   | "age"
-  | "date_diff";
+  | "date_diff"
+  | "image_edit";
 
 export interface HistoryEntry {
   id: string;

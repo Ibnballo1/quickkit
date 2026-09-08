@@ -38,6 +38,14 @@ export default function HomeScreen(): React.JSX.Element {
       accentColor: colors.info,
     },
     {
+      key: "crop",
+      title: "Crop Image",
+      subtitle: "Free or aspect ratio presets",
+      route: "/image/crop",
+      icon: "crop-outline",
+      accentColor: colors.warning,
+    },
+    {
       key: "percentage",
       title: "Percentage",
       subtitle: "X% of Y, change, diff",

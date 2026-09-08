@@ -109,8 +109,73 @@ quickkit/
       exact dimensions, aspect-ratio-preserving), `saveShareService.ts`
       (gallery save + native share sheet), `ChipGroup` component, and the
       `app/image/compress.tsx` / `app/image/resize.tsx` screens.
-- [ ] **Phase 2b** — Percentage/Discount calculators, Unit Converter,
-      Age/Date-Diff, QR Scanner/Generator, History, Settings.
+- [x] **Phase 2b** — Percentage/Discount calculators, Unit Converter
+      (8 categories, strongly typed, linear + affine temperature engine),
+      Age/Date-Difference tools (calendar-correct, leap-year-safe), and
+      QR Scanner/Generator (on-device parsing and generation, no network
+      round-trip).
+- [x] **Phase 2c** — History screen (filterable by tool type, per-entry and
+      bulk delete, reloads on focus since entries are written from other
+      screens) and Settings screen (theme toggle, clear all history, privacy
+      info and about modals, app version). Calculators/converter/date tools
+      now log to history too, via a debounced logger so live-recomputed
+      results don't spam an entry per keystroke. Home screen got history/
+      settings icons since nothing linked to them before.
+
+## Version 1.1 — Image Toolkit + Share-Ready Workflows
+
+- [x] **V1.1-A — Image Cropper** — `src/features/image-tools/imageCrop.ts`
+      (pure crop logic, reuses `expo-image-manipulator`'s existing `crop`
+      action), `src/components/CropOverlay.tsx` (interactive draggable/
+      resizable crop box, built entirely on core React Native
+      `PanResponder` + `Animated` — no Reanimated, no new dependency of
+      any kind), `app/image/crop.tsx` (pick → adjust → preview → save/
+      share, matching the existing compress/resize screen pattern). Free
+      crop plus 5 aspect-ratio presets (1:1, 4:3, 16:9, 4:5, 9:16).
+      `HistoryKind` extended with `'image_edit'` (additive change,
+      existing kinds untouched). One new home-screen card added for Crop;
+      no existing tool/screen behavior was modified.
+- [ ] V1.1-B — Image Format Converter (not started, awaiting approval)
+- [ ] V1.1-C — Image → PDF (not started — will need `expo-print`, a new
+      native dependency, and a rebuild)
+- [ ] V1.1-D — Share-Ready Presets (fold into `compress.tsx`)
+- [ ] V1.1-E — "Make It Smaller" home-screen quick action
+- [ ] V1.1-F — Improved result-card details on compress/resize
+
+## Native Build Notes (hard-won)
+
+If you're setting this project up fresh, these are the real gotchas
+encountered getting a local (non-EAS) Android build working:
+
+- **Package manager**: use npm, not pnpm, unless you configure
+  `node-linker=hoisted` in `.npmrc`. pnpm's default symlinked
+  `node_modules` structure breaks Expo's autolinking scripts.
+- **Node**: 22.13+ required by SDK 57; also required for
+  `expo/scripts/resolveAppEntry` (see entry point note below) to resolve
+  correctly.
+- **Entry point**: `package.json` `"main"` must be `"index.ts"`, and
+  `index.ts` at the project root must contain exactly
+  `import 'expo-router/entry';`. A leftover template `App.tsx` at the
+  root is not used by Expo Router but can indicate main is misconfigured
+  if you see its boilerplate content at runtime.
+- **NDK**: verify `C:\Android\sdk\ndk\<version>\source.properties` exists;
+  a corrupted/partial NDK install (missing this file) fails Gradle
+  configuration with a `CXX1101` error unrelated to any project code.
+- **Kotlin version**: `react-native-google-mobile-ads`'s bundled
+  `play-services-ads` AAR may be compiled with a newer Kotlin than Expo
+  SDK 57's default (2.1.20). Fixed via `expo-build-properties`'
+  `android.kotlinVersion` override — requires `npx expo prebuild --clean`
+  to take effect, and a full `gradlew --stop` + deleted
+  `~/.gradle/caches/*/transforms` if the old error persists after
+  bumping the version (stale artifact-transform cache).
+- **JDK**: JDK 24+ triggers a JEP 472 restricted-method warning that some
+  native CMake configure tasks (`react-native-worklets`,
+  `react-native-screens`) treat as fatal. Use JDK 17 for Gradle builds.
+- **`expo-file-system`**: SDK 54+ deprecated `getInfoAsync`/
+  `writeAsStringAsync` etc. on the main entrypoint. Import from
+  `expo-file-system/legacy` instead — same API, no deprecation warning
+  (and avoids a reported case where the warning surfaces as a runtime
+  error rather than just console noise).
 - [ ] **Phase 3** — `AdInterstitialService` wired into real completion events
       per screen; end-to-end local persistence; permission-denial UX;
       production readiness pass (error boundaries, accessibility audit,

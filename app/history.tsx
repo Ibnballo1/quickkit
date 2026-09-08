@@ -30,6 +30,7 @@ const KIND_ICON: Record<HistoryKind, keyof typeof Ionicons.glyphMap> = {
   conversion: "swap-horizontal-outline",
   age: "calendar-outline",
   date_diff: "time-outline",
+  image_edit: "crop-outline",
 };
 
 const FILTER_OPTIONS: { value: FilterKey; label: string }[] = [
@@ -40,6 +41,7 @@ const FILTER_OPTIONS: { value: FilterKey; label: string }[] = [
   { value: "conversion", label: "Conversions" },
   { value: "age", label: "Age" },
   { value: "date_diff", label: "Dates" },
+  { value: "image_edit", label: "Image Edits" },
 ];
 
 export default function HistoryScreen(): React.JSX.Element {
