@@ -46,6 +46,14 @@ export default function HomeScreen(): React.JSX.Element {
       accentColor: colors.warning,
     },
     {
+      key: "convert",
+      title: "Convert Format",
+      subtitle: "JPG, PNG, and WebP",
+      route: "/image/convert",
+      icon: "repeat-outline",
+      accentColor: colors.success,
+    },
+    {
       key: "percentage",
       title: "Percentage",
       subtitle: "X% of Y, change, diff",

@@ -65,3 +65,17 @@ export interface CropResult {
   height: number;
   fileSizeBytes: number;
 }
+
+/** Output formats only — expo-image-manipulator's SaveFormat has no WEBP
+ * encoder, but that's not a gap for this app: the spec only ever asks to
+ * convert FROM WebP, never TO it, and Android decodes WebP input natively
+ * regardless of output format. */
+export type ImageFormat = "jpg" | "png";
+
+export interface FormatConvertResult {
+  uri: string;
+  format: ImageFormat;
+  width: number;
+  height: number;
+  fileSizeBytes: number;
+}
