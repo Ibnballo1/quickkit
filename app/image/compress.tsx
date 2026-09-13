@@ -8,7 +8,10 @@ import { ResultCard } from "@/components/ResultCard";
 import { ChipGroup } from "@/components/ChipGroup";
 import { useTheme } from "@/theme/ThemeProvider";
 import { pickImage } from "@/features/image-tools/imagePickerService";
-import { compressImage } from "@/features/image-tools/imageCompression";
+import {
+  compressImage,
+  describeQuality,
+} from "@/features/image-tools/imageCompression";
 import {
   applySharePreset,
   SHARE_PRESETS,
@@ -272,18 +275,18 @@ export default function CompressImageScreen(): React.JSX.Element {
                 title="Result"
                 rows={[
                   {
-                    label: "Original size",
-                    value: formatBytes(result.originalSizeBytes),
+                    label: "Original",
+                    value: `${image.width}×${image.height} · ${formatBytes(result.originalSizeBytes)}`,
                   },
                   {
-                    label: "Compressed size",
-                    value: formatBytes(result.compressedSizeBytes),
+                    label: "New size",
+                    value: `${result.width}×${result.height} · ${formatBytes(result.compressedSizeBytes)}`,
                     emphasis: true,
                   },
                   { label: "Saved", value: `${result.percentSaved}%` },
                   {
-                    label: "Dimensions",
-                    value: `${result.width}×${result.height}`,
+                    label: "Quality",
+                    value: describeQuality(result.qualityUsed),
                   },
                 ]}
               />

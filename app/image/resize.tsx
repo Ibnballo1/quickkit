@@ -23,6 +23,17 @@ import { AdInterstitialService } from "@/services/AdInterstitialService";
 
 type ModeKey = "percentage" | "exact";
 
+/** Resize can occasionally produce a larger file (e.g. upscaling, or a
+ * source that was already heavily compressed), so this reports both
+ * directions rather than assuming "resize" always means "smaller". */
+function describeSizeChange(originalBytes: number, newBytes: number): string {
+  if (originalBytes <= 0) return "—";
+  const percent = Math.round((1 - newBytes / originalBytes) * 100);
+  if (percent > 0) return `${percent}% smaller`;
+  if (percent < 0) return `${Math.abs(percent)}% larger`;
+  return "No change";
+}
+
 export default function ResizeImageScreen(): React.JSX.Element {
   const { colors, typography, spacing } = useTheme();
   const [image, setImage] = useState<PickedImage | null>(null);
@@ -239,13 +250,20 @@ export default function ResizeImageScreen(): React.JSX.Element {
                 title="Result"
                 rows={[
                   {
-                    label: "New dimensions",
-                    value: `${result.width}×${result.height}`,
+                    label: "Original",
+                    value: `${image.width}×${image.height} · ${formatBytes(image.fileSizeBytes)}`,
+                  },
+                  {
+                    label: "New size",
+                    value: `${result.width}×${result.height} · ${formatBytes(result.fileSizeBytes)}`,
                     emphasis: true,
                   },
                   {
-                    label: "File size",
-                    value: formatBytes(result.fileSizeBytes),
+                    label: "Change",
+                    value: describeSizeChange(
+                      image.fileSizeBytes,
+                      result.fileSizeBytes,
+                    ),
                   },
                 ]}
               />
