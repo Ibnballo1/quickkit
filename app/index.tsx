@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/theme/ThemeProvider";
 import { ToolCard } from "@/components/ToolCard";
+import { QuickActionCard } from "@/components/QuickActionCard";
 
 interface ToolDefinition {
   key: string;
@@ -36,6 +37,30 @@ export default function HomeScreen(): React.JSX.Element {
       route: "/image/resize",
       icon: "resize-outline",
       accentColor: colors.info,
+    },
+    {
+      key: "crop",
+      title: "Crop Image",
+      subtitle: "Free or aspect ratio presets",
+      route: "/image/crop",
+      icon: "crop-outline",
+      accentColor: colors.warning,
+    },
+    {
+      key: "convert",
+      title: "Convert Format",
+      subtitle: "JPG, PNG, and WebP",
+      route: "/image/convert",
+      icon: "repeat-outline",
+      accentColor: colors.success,
+    },
+    {
+      key: "to-pdf",
+      title: "Images to PDF",
+      subtitle: "Combine photos into one PDF",
+      route: "/image/to-pdf",
+      icon: "document-outline",
+      accentColor: colors.danger,
     },
     {
       key: "percentage",
@@ -155,7 +180,15 @@ export default function HomeScreen(): React.JSX.Element {
           </Pressable>
         </View>
       </View>
-      <View style={styles.grid}>
+
+      <QuickActionCard
+        title="Make It Smaller"
+        subtitle="Shrink a photo for WhatsApp, email, or the web"
+        icon="contract-outline"
+        onPress={() => router.push("/image/compress?mode=purpose" as never)}
+      />
+
+      <View style={[styles.grid, { marginTop: spacing.md }]}>
         {tools.map((tool) => (
           <View key={tool.key} style={styles.gridItem}>
             <ToolCard

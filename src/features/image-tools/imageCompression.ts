@@ -24,6 +24,16 @@ function targetToMaxBytes(target: CompressionTarget): number | null {
   }
 }
 
+/** Plain-language quality label rather than exposing the raw JPEG
+ * quality float — consistent with how Share-Ready Presets avoid
+ * technical terms elsewhere in this app. */
+export function describeQuality(quality: number): string {
+  if (quality >= 0.85) return "High";
+  if (quality >= 0.65) return "Good";
+  if (quality >= 0.45) return "Fair";
+  return "Low";
+}
+
 async function getSizeBytes(uri: string): Promise<number> {
   const info = await FileSystem.getInfoAsync(uri);
   return info.exists && "size" in info ? info.size : 0;
