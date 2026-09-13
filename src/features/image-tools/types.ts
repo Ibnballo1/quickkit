@@ -79,3 +79,15 @@ export interface FormatConvertResult {
   height: number;
   fileSizeBytes: number;
 }
+
+export interface PdfGenerationResult {
+  uri: string;
+  pageCount: number;
+  fileSizeBytes: number;
+}
+
+export type SavePdfOutcome =
+  | { status: "saved" }
+  | { status: "cancelled" }
+  | { status: "error" }
+  | { status: "unwritableFolder" };

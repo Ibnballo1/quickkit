@@ -54,6 +54,14 @@ export default function HomeScreen(): React.JSX.Element {
       accentColor: colors.success,
     },
     {
+      key: "to-pdf",
+      title: "Images to PDF",
+      subtitle: "Combine photos into one PDF",
+      route: "/image/to-pdf",
+      icon: "document-outline",
+      accentColor: colors.danger,
+    },
+    {
       key: "percentage",
       title: "Percentage",
       subtitle: "X% of Y, change, diff",

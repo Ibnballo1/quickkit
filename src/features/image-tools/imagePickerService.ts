@@ -8,6 +8,11 @@ export type PickImageOutcome =
   | { status: "canceled" }
   | { status: "permissionDenied" };
 
+export type PickMultipleImagesOutcome =
+  | { status: "picked"; images: PickedImage[] }
+  | { status: "canceled" }
+  | { status: "permissionDenied" };
+
 /**
  * Launches the native image picker. Requests library permission first so we
  * can distinguish "user denied" from "user canceled the picker" and show the
@@ -56,6 +61,42 @@ async function getFileSize(uri: string): Promise<number> {
   } catch {
     return 0;
   }
+}
+
+/**
+ * Multi-select variant for Image → PDF only. Kept separate from
+ * pickImage() rather than adding a parameter to it, so every existing
+ * call site (compress, resize, crop, convert) is untouched.
+ */
+export async function pickMultipleImages(): Promise<PickMultipleImagesOutcome> {
+  const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!permission.granted) {
+    return { status: "permissionDenied" };
+  }
+
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ["images"],
+    quality: 1,
+    exif: false,
+    allowsMultipleSelection: true,
+  });
+
+  if (result.canceled || result.assets.length === 0) {
+    return { status: "canceled" };
+  }
+
+  const images = await Promise.all(
+    result.assets.map(async (asset) => ({
+      uri: asset.uri,
+      width: asset.width,
+      height: asset.height,
+      fileName: asset.fileName ?? uriToFileName(asset.uri),
+      fileSizeBytes: asset.fileSize ?? (await getFileSize(asset.uri)),
+      mimeType: asset.mimeType ?? "image/jpeg",
+    })),
+  );
+
+  return { status: "picked", images };
 }
 
 function uriToFileName(uri: string): string {

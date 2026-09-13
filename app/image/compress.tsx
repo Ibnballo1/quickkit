@@ -9,6 +9,11 @@ import { useTheme } from "@/theme/ThemeProvider";
 import { pickImage } from "@/features/image-tools/imagePickerService";
 import { compressImage } from "@/features/image-tools/imageCompression";
 import {
+  applySharePreset,
+  SHARE_PRESETS,
+  SharePresetKey,
+} from "@/features/image-tools/SharePresets";
+import {
   saveImageToGallery,
   shareImage,
 } from "@/features/image-tools/saveShareService";
@@ -27,6 +32,7 @@ type TargetKey =
   | "under2mb"
   | "bestQuality"
   | "custom";
+type CompressMode = "size" | "purpose";
 
 const TARGET_OPTIONS: { value: TargetKey; label: string }[] = [
   { value: "under500kb", label: "Under 500 KB" },
@@ -36,11 +42,17 @@ const TARGET_OPTIONS: { value: TargetKey; label: string }[] = [
   { value: "custom", label: "Custom" },
 ];
 
+const PRESET_OPTIONS: { value: SharePresetKey; label: string }[] = (
+  Object.keys(SHARE_PRESETS) as SharePresetKey[]
+).map((key) => ({ value: key, label: SHARE_PRESETS[key].label }));
+
 export default function CompressImageScreen(): React.JSX.Element {
   const { colors, typography, spacing } = useTheme();
   const [image, setImage] = useState<PickedImage | null>(null);
+  const [mode, setMode] = useState<CompressMode>("size");
   const [target, setTarget] = useState<TargetKey>("under1mb");
   const [customKb, setCustomKb] = useState("");
+  const [preset, setPreset] = useState<SharePresetKey>("whatsapp");
   const [result, setResult] = useState<CompressionResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -63,31 +75,41 @@ export default function CompressImageScreen(): React.JSX.Element {
   const handleCompress = async (): Promise<void> => {
     if (!image) return;
 
-    let compressionTarget: CompressionTarget;
-    if (target === "custom") {
-      const kb = Number(customKb);
-      if (!Number.isFinite(kb) || kb <= 0) {
-        Alert.alert(
-          "Enter a target size",
-          "Enter the target size in KB, e.g. 127.",
-        );
-        return;
-      }
-      compressionTarget = {
-        kind: "custom",
-        maxSizeBytes: Math.round(kb * 1024),
-      };
-    } else {
-      compressionTarget = { kind: target };
-    }
-
     setIsProcessing(true);
     try {
-      const compressed = await compressImage(image, compressionTarget);
+      let compressed: CompressionResult;
+      let historySubtitleSuffix: string;
+
+      if (mode === "purpose") {
+        compressed = await applySharePreset(image, preset);
+        historySubtitleSuffix = ` for ${SHARE_PRESETS[preset].label}`;
+      } else {
+        let compressionTarget: CompressionTarget;
+        if (target === "custom") {
+          const kb = Number(customKb);
+          if (!Number.isFinite(kb) || kb <= 0) {
+            Alert.alert(
+              "Enter a target size",
+              "Enter the target size in KB, e.g. 127.",
+            );
+            setIsProcessing(false);
+            return;
+          }
+          compressionTarget = {
+            kind: "custom",
+            maxSizeBytes: Math.round(kb * 1024),
+          };
+        } else {
+          compressionTarget = { kind: target };
+        }
+        compressed = await compressImage(image, compressionTarget);
+        historySubtitleSuffix = "";
+      }
+
       setResult(compressed);
       await addHistoryEntry({
         kind: "calculation",
-        title: `Compressed ${image.fileName}`,
+        title: `Compressed ${image.fileName}${historySubtitleSuffix}`,
         subtitle: `${formatBytes(compressed.originalSizeBytes)} → ${formatBytes(compressed.compressedSizeBytes)} (${compressed.percentSaved}% saved)`,
         data: { uri: compressed.uri },
       });
@@ -162,30 +184,69 @@ export default function CompressImageScreen(): React.JSX.Element {
             </View>
           </View>
 
-          <Text
-            style={[
-              typography.body,
-              { color: colors.textSecondary, marginBottom: spacing.xs },
-            ]}
-          >
-            Target size
-          </Text>
           <ChipGroup
-            options={TARGET_OPTIONS}
-            value={target}
-            onChange={setTarget}
-            accessibilityLabel="Compression target"
+            options={[
+              { value: "size", label: "By Size" },
+              { value: "purpose", label: "By Purpose" },
+            ]}
+            value={mode}
+            onChange={setMode}
+            accessibilityLabel="Compression mode"
           />
 
-          {target === "custom" ? (
-            <InputField
-              label="Target size"
-              keyboardType="number-pad"
-              value={customKb}
-              onChangeText={setCustomKb}
-              suffix="KB"
-            />
-          ) : null}
+          {mode === "purpose" ? (
+            <>
+              <Text
+                style={[
+                  typography.body,
+                  { color: colors.textSecondary, marginBottom: spacing.xs },
+                ]}
+              >
+                Where is this going?
+              </Text>
+              <ChipGroup
+                options={PRESET_OPTIONS}
+                value={preset}
+                onChange={setPreset}
+                accessibilityLabel="Share destination"
+              />
+              <Text
+                style={[
+                  typography.caption,
+                  { color: colors.textTertiary, marginBottom: spacing.md },
+                ]}
+              >
+                {SHARE_PRESETS[preset].description}
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text
+                style={[
+                  typography.body,
+                  { color: colors.textSecondary, marginBottom: spacing.xs },
+                ]}
+              >
+                Target size
+              </Text>
+              <ChipGroup
+                options={TARGET_OPTIONS}
+                value={target}
+                onChange={setTarget}
+                accessibilityLabel="Compression target"
+              />
+
+              {target === "custom" ? (
+                <InputField
+                  label="Target size"
+                  keyboardType="number-pad"
+                  value={customKb}
+                  onChangeText={setCustomKb}
+                  suffix="KB"
+                />
+              ) : null}
+            </>
+          )}
 
           <PrimaryButton
             label={isProcessing ? "Compressing…" : "Compress"}
