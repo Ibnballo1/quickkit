@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/theme/ThemeProvider";
 import { ToolCard } from "@/components/ToolCard";
+import { QuickActionCard } from "@/components/QuickActionCard";
 
 interface ToolDefinition {
   key: string;
@@ -179,7 +180,15 @@ export default function HomeScreen(): React.JSX.Element {
           </Pressable>
         </View>
       </View>
-      <View style={styles.grid}>
+
+      <QuickActionCard
+        title="Make It Smaller"
+        subtitle="Shrink a photo for WhatsApp, email, or the web"
+        icon="contract-outline"
+        onPress={() => router.push("/image/compress?mode=purpose" as never)}
+      />
+
+      <View style={[styles.grid, { marginTop: spacing.md }]}>
         {tools.map((tool) => (
           <View key={tool.key} style={styles.gridItem}>
             <ToolCard

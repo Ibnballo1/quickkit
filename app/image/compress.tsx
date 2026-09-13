@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, Alert } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 import { ToolScreenLayout } from "@/components/ToolScreenLayout";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { InputField } from "@/components/InputField";
@@ -48,8 +49,11 @@ const PRESET_OPTIONS: { value: SharePresetKey; label: string }[] = (
 
 export default function CompressImageScreen(): React.JSX.Element {
   const { colors, typography, spacing } = useTheme();
+  const params = useLocalSearchParams<{ mode?: string }>();
+  const initialMode: CompressMode =
+    params.mode === "purpose" ? "purpose" : "size";
   const [image, setImage] = useState<PickedImage | null>(null);
-  const [mode, setMode] = useState<CompressMode>("size");
+  const [mode, setMode] = useState<CompressMode>(initialMode);
   const [target, setTarget] = useState<TargetKey>("under1mb");
   const [customKb, setCustomKb] = useState("");
   const [preset, setPreset] = useState<SharePresetKey>("whatsapp");
